@@ -7,6 +7,8 @@ let
   lib = import ./lib { inherit pkgs; }; # functions
 
   bcachefs-tools = pkgs.callPackage ./pkgs/bcachefs-tools { };
+  bcachefs-bch-bindgen = pkgs.callPackage ./pkgs/bcachefs-tools/bch_bindgen.nix { inherit bcachefs-tools; };
+  bcachefs-mount = pkgs.callPackage ./pkgs/bcachefs-tools/mount.nix { bch_bindgen = bcachefs-bch-bindgen; };
   bcachefs-kernel = pkgs.callPackage ./pkgs/bcachefs-kernel {
     kernel = pkgs.linuxKernel.kernels.linux_5_19;
     kernelPatches = [
@@ -16,7 +18,12 @@ let
   };
 in
 {
-  inherit bcachefs-tools bcachefs-kernel lib;
+  inherit
+    bcachefs-bch-bindgen
+    bcachefs-mount
+    bcachefs-tools
+    bcachefs-kernel
+    lib;
   # The `lib`, `modules`, and `overlay` names are special
   modules = import ./modules; # NixOS modules
   overlays = import ./overlays; # nixpkgs overlays
